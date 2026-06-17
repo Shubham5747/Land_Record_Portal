@@ -1,5 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SearchForm from "@/components/home/SearchForm";
 
 export default function Home() {
   return (
@@ -16,35 +17,7 @@ export default function Home() {
             Search and manage digital land records with ease.
           </p>
 
-          <div className="mt-12 max-w-3xl mx-auto rounded-xl bg-white p-8 shadow-md">
-            <h3 className="mb-6 text-2xl font-semibold">
-              Search Land Records
-            </h3>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <select className="rounded-lg border p-3">
-                <option>Select District</option>
-              </select>
-
-              <select className="rounded-lg border p-3">
-                <option>Select Taluka</option>
-              </select>
-
-              <select className="rounded-lg border p-3">
-                <option>Select Village</option>
-              </select>
-
-              <input
-                type="text"
-                placeholder="Enter Survey Number"
-                className="rounded-lg border p-3"
-              />
-            </div>
-
-            <button className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-medium text-white hover:bg-blue-700">
-              Search
-            </button>
-          </div>
+          <SearchForm />
         </section>
       </main>
 
