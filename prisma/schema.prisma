@@ -8,36 +8,115 @@ datasource db {
 }
 
 model District {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
+  id           Int @id @default(autoincrement())
+  districtCode Int @unique
 
-  talukas   Taluka[]
+  name        String
+  marathiName String?
+
+  talukas     Taluka[]
+  landRecords LandRecord[]
 
   createdAt DateTime @default(now())
 }
 
 model Taluka {
-  id         Int      @id @default(autoincrement())
-  name       String
+  id         Int @id @default(autoincrement())
+  talukaCode Int @unique
+
+  name        String
+  marathiName String?
 
   districtId Int
-
   district   District @relation(fields: [districtId], references: [id])
 
-  villages   Village[]
+  villages    Village[]
+  landRecords LandRecord[]
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  @@unique([name, districtId])
+  @@index([districtId])
 }
 
 model Village {
-  id        Int      @id @default(autoincrement())
-  name      String
+  id          Int @id @default(autoincrement())
+  villageCode Int @unique
 
-  talukaId  Int
+  name        String
+  marathiName String?
 
-  taluka    Taluka   @relation(fields: [talukaId], references: [id])
+  talukaId Int
+  taluka   Taluka @relation(fields: [talukaId], references: [id])
+
+  landRecords LandRecord[]
+
+  createdAt DateTime @default(now())
+
+  @@index([talukaId])
+}
+
+model LandRecord {
+  id Int @id @default(autoincrement())
+
+  surveyNumber String
+
+  ownerId Int?
+  owner   Owner? @relation(fields: [ownerId], references: [id])
+
+  ownerName String
+
+  area Float
+
+  landType       String?
+  irrigationType String?
+  cropType       String?
+
+  khataNumber    String?
+  mutationNumber String?
+
+  districtId Int
+  talukaId   Int
+  villageId  Int
+
+  district District @relation(fields: [districtId], references: [id])
+
+  taluka Taluka @relation(fields: [talukaId], references: [id])
+
+  village Village @relation(fields: [villageId], references: [id])
+
+  mutations Mutation[]
+
+  createdAt DateTime @default(now())
+
+  @@index([districtId])
+  @@index([talukaId])
+  @@index([villageId])
+  @@index([surveyNumber])
+}
+
+model Owner {
+  id Int @id @default(autoincrement())
+
+  name    String
+  mobile  String?
+  address String?
+
+  landRecords LandRecord[]
+
+  createdAt DateTime @default(now())
+}
+
+model Mutation {
+  id Int @id @default(autoincrement())
+
+  mutationNumber String
+
+  mutationDate DateTime
+
+  remarks String?
+
+  landRecordId Int
+  landRecord   LandRecord @relation(fields: [landRecordId], references: [id])
 
   createdAt DateTime @default(now())
 }
