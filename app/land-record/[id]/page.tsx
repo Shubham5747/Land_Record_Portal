@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type LandRecord = {
   id: number;
@@ -30,6 +31,20 @@ type LandRecord = {
   village: {
     name: string;
   };
+
+  owner: {
+    id: number;
+    name: string;
+    mobile?: string;
+    address?: string;
+  };
+
+  mutations: {
+    id: number;
+    mutationNumber: string;
+    mutationDate: string;
+    remarks?: string;
+  }[];
 };
 
 export default function LandRecordPage({
@@ -69,44 +84,90 @@ export default function LandRecordPage({
   }, [params]);
 
   const downloadPDF = () => {
-  if (!record) return;
+    if (!record) return;
 
-  const pdf = new jsPDF();
+    const pdf = new jsPDF();
 
-  pdf.setFontSize(18);
-  pdf.text("MAHARASHTRA LAND RECORD PORTAL", 20, 20);
+    // Header
+    pdf.setFontSize(18);
+    pdf.text("MAHARASHTRA LAND RECORD PORTAL", 105, 15, {
+      align: "center",
+    });
 
-  pdf.setFontSize(14);
-  pdf.text("7/12 EXTRACT", 20, 30);
+    pdf.setFontSize(14);
+    pdf.text("7/12 EXTRACT", 105, 25, {
+      align: "center",
+    });
 
-  pdf.setFontSize(11);
+    // Land Details
+    autoTable(pdf, {
+      startY: 35,
+      head: [["Field", "Value"]],
+      body: [
+        ["Survey Number", record.surveyNumber],
+        ["Khata Number", record.khataNumber || "-"],
+        ["Owner Name", record.ownerName],
+        ["Mutation Number", record.mutationNumber || "-"],
+        ["District", record.district.name],
+        ["Taluka", record.taluka.name],
+        ["Village", record.village.name],
+        ["Area", `${record.area.toFixed(2)} Acres`],
+        ["Land Type", record.landType || "-"],
+        ["Irrigation Type", record.irrigationType || "-"],
+        ["Crop Type", record.cropType || "-"],
+      ],
+    });
 
-  pdf.text(`Survey Number: ${record.surveyNumber}`, 20, 50);
-  pdf.text(`Khata Number: ${record.khataNumber || "-"}`, 20, 60);
-  pdf.text(`Owner Name: ${record.ownerName}`, 20, 70);
-  pdf.text(`Mutation Number: ${record.mutationNumber || "-"}`, 20, 80);
+    // Owner Details
+    const ownerY = (pdf as any).lastAutoTable.finalY + 10;
 
-  pdf.text(`District: ${record.district.name}`, 20, 100);
-  pdf.text(`Taluka: ${record.taluka.name}`, 20, 110);
-  pdf.text(`Village: ${record.village.name}`, 20, 120);
+    pdf.setFontSize(13);
+    pdf.text("Owner Details", 14, ownerY);
 
-  pdf.text(`Area: ${record.area} Acres`, 20, 140);
-  pdf.text(`Land Type: ${record.landType || "-"}`, 20, 150);
-  pdf.text(
-    `Irrigation Type: ${record.irrigationType || "-"}`,
-    20,
-    160
-  );
-  pdf.text(`Crop Type: ${record.cropType || "-"}`, 20, 170);
+    autoTable(pdf, {
+      startY: ownerY + 5,
+      head: [["Field", "Value"]],
+      body: [
+        ["Owner Name", record.owner.name],
+        ["Mobile", record.owner.mobile || "-"],
+        ["Address", record.owner.address || "-"],
+      ],
+    });
 
-  pdf.text(
-    `Generated On: ${new Date().toLocaleDateString()}`,
-    20,
-    190
-  );
+    // Mutation History
+    const mutationY = (pdf as any).lastAutoTable.finalY + 10;
 
-  pdf.save(`7-12-${record.surveyNumber}.pdf`);
-};
+    pdf.setFontSize(13);
+    pdf.text("Mutation History", 14, mutationY);
+
+    autoTable(pdf, {
+      startY: mutationY + 5,
+      head: [["Mutation No", "Date", "Remarks"]],
+      body: record.mutations.map((mutation) => [
+        mutation.mutationNumber,
+        new Date(mutation.mutationDate).toLocaleDateString(),
+        mutation.remarks || "-",
+      ]),
+    });
+
+    const footerY = (pdf as any).lastAutoTable.finalY + 15;
+
+    pdf.setFontSize(10);
+
+    pdf.text(
+      `Generated On: ${new Date().toLocaleDateString()}`,
+      14,
+      footerY
+    );
+
+    pdf.text(
+      `Record ID: ${record.id}`,
+      14,
+      footerY + 8
+    );
+
+    pdf.save(`7-12-${record.surveyNumber}.pdf`);
+  };
 
   if (loading) {
     return (
@@ -145,9 +206,9 @@ export default function LandRecordPage({
       </div>
 
       {/* PDF Content */}
-      <div        
+      <div
         className="rounded-lg border bg-white p-8 shadow"
-      >
+      >        
         {/* Header */}
         <div className="mb-8 border-b pb-4 text-center">
           <h1 className="text-3xl font-bold">
@@ -163,7 +224,7 @@ export default function LandRecordPage({
           </p>
         </div>
 
-        {/* Record Information */}
+        {/* Land Details */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
           <div>
@@ -273,13 +334,98 @@ export default function LandRecordPage({
               {new Date().toLocaleDateString()}
             </p>
           </div>
+
+        </div>
+
+        {/* Owner Details */}
+        <div className="mt-10 border-t pt-6">
+          <h2 className="mb-4 text-xl font-semibold">
+            Owner Details
+          </h2>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Owner Name
+              </p>
+              <p className="font-semibold">
+                {record.owner.name}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Mobile
+              </p>
+              <p className="font-semibold">
+                {record.owner.mobile || "-"}
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <p className="text-sm text-gray-500">
+                Address
+              </p>
+              <p className="font-semibold">
+                {record.owner.address || "-"}
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Mutation History */}
+        <div className="mt-10 border-t pt-6">
+          <h2 className="mb-4 text-xl font-semibold">
+            Mutation History
+          </h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-3 text-left">
+                    Mutation No
+                  </th>
+
+                  <th className="border p-3 text-left">
+                    Date
+                  </th>
+
+                  <th className="border p-3 text-left">
+                    Remarks
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {record.mutations.map((mutation) => (
+                  <tr key={mutation.id}>
+                    <td className="border p-3">
+                      {mutation.mutationNumber}
+                    </td>
+
+                    <td className="border p-3">
+                      {new Date(
+                        mutation.mutationDate
+                      ).toLocaleDateString()}
+                    </td>
+
+                    <td className="border p-3">
+                      {mutation.remarks || "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Footer */}
         <div className="mt-10 border-t pt-4 text-center text-sm text-gray-500">
-          This is a digitally generated land record
-          for demonstration purposes.
-        </div>
+          This is a digitally generated land record for demonstration purposes.
+        </div>      
       </div>
     </div>
   );

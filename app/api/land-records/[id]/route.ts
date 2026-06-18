@@ -16,6 +16,13 @@ export async function GET(
       district: true,
       taluka: true,
       village: true,
+      owner: true,
+
+      mutations: {
+        orderBy: {
+          mutationDate: "desc",
+        },
+      },
     },
   });
 
