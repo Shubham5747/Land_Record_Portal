@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+
+type JsPdfWithAutoTable = jsPDF & {
+  lastAutoTable?: { finalY: number };
+};
 
 type LandRecord = {
   id: number;
@@ -119,7 +123,8 @@ export default function LandRecordPage({
     });
 
     // Owner Details
-    const ownerY = (pdf as any).lastAutoTable.finalY + 10;
+    const ownerY =
+      ((pdf as JsPdfWithAutoTable).lastAutoTable?.finalY ?? 35) + 10;
 
     pdf.setFontSize(13);
     pdf.text("Owner Details", 14, ownerY);
@@ -135,7 +140,8 @@ export default function LandRecordPage({
     });
 
     // Mutation History
-    const mutationY = (pdf as any).lastAutoTable.finalY + 10;
+    const mutationY =
+      ((pdf as JsPdfWithAutoTable).lastAutoTable?.finalY ?? ownerY) + 10;
 
     pdf.setFontSize(13);
     pdf.text("Mutation History", 14, mutationY);
@@ -150,7 +156,8 @@ export default function LandRecordPage({
       ]),
     });
 
-    const footerY = (pdf as any).lastAutoTable.finalY + 15;
+    const footerY =
+      ((pdf as JsPdfWithAutoTable).lastAutoTable?.finalY ?? mutationY) + 15;
 
     pdf.setFontSize(10);
 

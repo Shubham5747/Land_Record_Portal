@@ -57,77 +57,74 @@ export default function CreateLandRecordPage() {
   });
 
   useEffect(() => {
-    loadDistricts();
-    loadOwners();
+    async function loadInitialOptions() {
+      const [districtResponse, ownerResponse] = await Promise.all([
+        fetch("/api/districts"),
+        fetch("/api/admin/owners"),
+      ]);
+
+      if (districtResponse.ok) {
+        setDistricts(await districtResponse.json());
+      }
+
+      if (ownerResponse.ok) {
+        setOwners(await ownerResponse.json());
+      }
+    }
+
+    void loadInitialOptions();
   }, []);
 
   useEffect(() => {
-    if (!form.districtId) {
-      setTalukas([]);
-      return;
-    }
+    if (!form.districtId) return;
 
     async function loadTalukas() {
       const response = await fetch(
         `/api/talukas?districtId=${form.districtId}`
       );
 
-      const data = await response.json();
-
-      setTalukas(data);
+      if (response.ok) {
+        setTalukas(await response.json());
+      }
     }
 
     loadTalukas();
   }, [form.districtId]);
 
   useEffect(() => {
-    if (!form.talukaId) {
-      setVillages([]);
-      return;
-    }
+    if (!form.talukaId) return;
 
     async function loadVillages() {
       const response = await fetch(
         `/api/villages?talukaId=${form.talukaId}`
       );
 
-      const data = await response.json();
-
-      setVillages(data);
+      if (response.ok) {
+        setVillages(await response.json());
+      }
     }
 
     loadVillages();
   }, [form.talukaId]);
 
-  async function loadDistricts() {
-    const response =
-      await fetch("/api/districts");
-
-    setDistricts(await response.json());
-  }
-
-  async function loadOwners() {
-    const response =
-      await fetch("/api/admin/owners");
-
-    setOwners(await response.json());
-  }
-
-  if (
-    !form.surveyNumber ||
-    !form.districtId ||
-    !form.talukaId ||
-    !form.villageId ||
-    !form.ownerId
-  ) {
-    alert("Please fill all required fields");
-    return;
-  }
-
   async function handleSubmit(
     e: React.FormEvent
   ) {
     e.preventDefault();
+
+    if (
+      !form.surveyNumber.trim() ||
+      !form.area ||
+      !form.districtId ||
+      !form.talukaId ||
+      !form.villageId ||
+      !form.ownerId
+    ) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const owner = owners.find(({ id }) => String(id) === form.ownerId);
 
     const response = await fetch(
       "/api/admin/land-records/create",
@@ -137,7 +134,10 @@ export default function CreateLandRecordPage() {
           "Content-Type":
             "application/json",
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          ownerName: owner?.name ?? "",
+        }),
       }
     );
 
@@ -160,6 +160,7 @@ export default function CreateLandRecordPage() {
       >
         <input
           placeholder="Survey Number"
+          required
           className="rounded border p-3"
           value={form.surveyNumber}
           onChange={(e) =>
@@ -172,16 +173,19 @@ export default function CreateLandRecordPage() {
         />
 
         <select
+          required
           className="rounded border p-3"
           value={form.districtId}
-          onChange={(e) =>
+          onChange={(e) => {
+            setTalukas([]);
+            setVillages([]);
             setForm({
               ...form,
               districtId: e.target.value,
               talukaId: "",
               villageId: "",
-            })
-          }
+            });
+          }}
         >
           <option value="">Select District</option>
 
@@ -196,15 +200,17 @@ export default function CreateLandRecordPage() {
         </select>
 
         <select
+          required
           className="rounded border p-3"
           value={form.talukaId}
-          onChange={(e) =>
+          onChange={(e) => {
+            setVillages([]);
             setForm({
               ...form,
               talukaId: e.target.value,
               villageId: "",
-            })
-          }
+            });
+          }}
         >
           <option value="">Select Taluka</option>
 
@@ -219,6 +225,7 @@ export default function CreateLandRecordPage() {
         </select>
 
         <select
+          required
           className="rounded border p-3"
           value={form.villageId}
           onChange={(e) =>
@@ -266,6 +273,7 @@ export default function CreateLandRecordPage() {
         />
 
         <select
+          required
           className="rounded border p-3"
           value={form.ownerId}
           onChange={(e) =>
@@ -290,6 +298,9 @@ export default function CreateLandRecordPage() {
         <input
           placeholder="Area"
           type="number"
+          required
+          min="0"
+          step="any"
           className="rounded border p-3"
           value={form.area}
           onChange={(e) =>

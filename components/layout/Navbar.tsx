@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
@@ -12,12 +14,15 @@ export default function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center gap-8">
-          <a href="/" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
+          <Link href="/" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
             Home
-          </a>
-          <a href="/search" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
+          </Link>
+          <Link href="/search" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
             Search Records
-          </a>
+          </Link>
+          <Link href="/chat" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
+            AI Assistant
+          </Link>
           <a href="#about" className="text-sm font-medium text-slate-700 hover:text-sky-700 transition-colors dark:text-slate-300 dark:hover:text-sky-400">
             About
           </a>

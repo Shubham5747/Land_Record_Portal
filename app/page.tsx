@@ -1,6 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import SearchForm from "@/components/home/SearchForm";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -25,6 +26,13 @@ export default function Home() {
               Search, retrieve, and manage digital land records with ease. Fast, secure, and transparent access to all your land information in one place.
             </p>
 
+            <Link
+              href="/chat"
+              className="mt-8 inline-flex rounded bg-teal-700 px-5 py-3 font-medium text-white transition-colors hover:bg-teal-800"
+            >
+              Ask the AI Assistant
+            </Link>
+
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <div className="flex items-center justify-center gap-2 text-slate-700 dark:text-slate-300">
                 <span>⚡</span>
@@ -40,7 +48,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
           <SearchForm />
         </section>
 

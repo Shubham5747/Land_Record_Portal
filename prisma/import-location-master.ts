@@ -4,10 +4,22 @@ import path from "path";
 
 const prisma = new PrismaClient();
 
+type LocationRow = {
+  districtCode: number | string;
+  DistrictName: string;
+  MarathiDistrictName?: string;
+  SubdistrictCode: number | string;
+  SubdistrictName: string;
+  MarathiSubDistrictName?: string;
+  VillageCode: number | string;
+  VillageName: string;
+  MarathiVillageName?: string;
+};
+
 async function processFile(filePath: string) {
   const workbook = XLSX.readFile(filePath);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json<any>(sheet);
+  const rows = XLSX.utils.sheet_to_json<LocationRow>(sheet);
 
   console.log(`Processing ${rows.length} rows from ${path.basename(filePath)}`);
 

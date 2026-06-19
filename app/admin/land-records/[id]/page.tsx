@@ -3,11 +3,17 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type LandRecordForm = {
+  surveyNumber: string;
+  khataNumber: string | null;
+  area: number | string;
+};
+
 export default function EditLandRecordPage() {
   const params = useParams();
   const router = useRouter();
 
-  const [form, setForm] = useState<any>(null);
+  const [form, setForm] = useState<LandRecordForm | null>(null);
 
   useEffect(() => {
     async function loadRecord() {

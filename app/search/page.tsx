@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 
 type LandRecord = {
@@ -23,7 +23,7 @@ type LandRecord = {
   };
 };
 
-export default function SearchPage() {
+function SearchResults() {
   const searchParams = useSearchParams();
 
   const [records, setRecords] = useState<LandRecord[]>([]);
@@ -216,5 +216,19 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[400px] items-center justify-center text-lg font-medium">
+          Loading land records...
+        </div>
+      }
+    >
+      <SearchResults />
+    </Suspense>
   );
 }
